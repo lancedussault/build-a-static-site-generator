@@ -10,9 +10,10 @@ class HTMLNode():
        
     def props_to_html(self):
        stringified_dict = ""
-       for obj in self.props:
-           for key, value in obj.items():
-               stringified_dict += f' {key}="{value}"'
+       if self.props == None:
+           return ""
+       for key, value in self.props.items():
+           stringified_dict += f' {key}="{value}"'
        return stringified_dict
 
     def __repr__(self):
