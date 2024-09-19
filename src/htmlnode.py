@@ -6,11 +6,11 @@ class HTMLNode():
        self.props = props
 
     def to_html(self):
-       raise NotImplementedError
+       raise NotImplementedError("to_html method is not implemented")
        
     def props_to_html(self):
        stringified_dict = ""
-       if self.props == None:
+       if self.props is None:
            return ""
        for key, value in self.props.items():
            stringified_dict += f' {key}="{value}"'
