@@ -1,6 +1,6 @@
 import unittest
 
-from htmlnode import HTMLNode, LeafNode
+from htmlnode import HTMLNode, LeafNode, ParentNode
 
 
 class TestHTMLNode(unittest.TestCase):
@@ -33,6 +33,43 @@ class TestHTMLNode(unittest.TestCase):
     def test_multiple_props(self):
         node = LeafNode("a", "Open in new tab", {"href": "https://www.example.com", "target": "_blank"})
         self.assertEqual(node.to_html(), '<a href="https://www.example.com" target="_blank">Open in new tab</a>')
+
+    def test_parent_node(self):
+        node = ParentNode(
+            "p",
+            [
+                LeafNode("b", "Bold text"),
+                LeafNode(None, "Normal text"),
+                LeafNode("i", "italic text"),
+                LeafNode(None, "Normal text"),
+            ], None)
+
+        self.assertEqual(node.to_html(), "<p><b>Bold text</b>Normal text<i>italic text</i>Normal text</p>")
+
+    def test_nested_parent_nodes(self):
+        inner_node = ParentNode("div", [LeafNode("span", "Inner text")], None)
+        outer_node = ParentNode("section", [
+            LeafNode("h1", "Title"),
+            inner_node,
+            LeafNode("p", "Paragraph")
+        ], None)
+        expected_html = "<section><h1>Title</h1><div><span>Inner text</span></div><p>Paragraph</p></section>"
+        self.assertEqual(outer_node.to_html(), expected_html)
+
+    def test_parent_no_children(self):
+        with self.assertRaises(ValueError) as context:
+            ParentNode("div", [], None).to_html()
+        self.assertTrue("What makes a Parent node? Children!" in str(context.exception))
+
+    def test_parent_no_tag(self):
+        node = ParentNode(None, [
+                LeafNode("h1", "Title", None),
+                LeafNode("p", "Paragraph", None)
+            ], None)
+        
+        with self.assertRaises(ValueError) as context:
+            node.to_html()
+        self.assertTrue("Parent nodes must have a tag!" in str(context.exception))
        
 if __name__ == "__main__":
     unittest.main()
