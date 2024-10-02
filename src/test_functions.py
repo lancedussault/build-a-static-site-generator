@@ -125,7 +125,6 @@ class TestSplitImgAndLinks(unittest.TestCase):
             TextNode("to youtube", text_type_link, "https://www.youtube.com/@bootdotdev"),
             ])
  
-
     def test_no_link(self):
         node = TextNode(
         "This is text with no links",
@@ -149,6 +148,47 @@ class TestSplitImgAndLinks(unittest.TestCase):
             "This is text with no links",
             text_type_text,
             )])
+
+class TestTextToTextNodes(unittest.TestCase):
+    
+    def test_multiple_types(self):
+        text = "This is **text** with an *italic* word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)"
+        converted_text = text_to_textnodes(text)
+        self.assertEqual(converted_text, [
+            TextNode("This is ", text_type_text),
+            TextNode("text", text_type_bold),
+            TextNode(" with an ", text_type_text),
+            TextNode("italic", text_type_italic),
+            TextNode(" word and a ", text_type_text),
+            TextNode("code block", text_type_code),
+            TextNode(" and an ", text_type_text),
+            TextNode("obi wan image", text_type_image, "https://i.imgur.com/fJRm4Vk.jpeg"),
+            TextNode(" and a ", text_type_text),
+            TextNode("link", text_type_link, "https://boot.dev"),
+        ])
+
+    def test_empty_string(self):
+        text = ""
+        converted_text = text_to_textnodes(text)
+        self.assertEqual(converted_text, [])
+
+class TestMarkdownToBlocks(unittest.TestCase):
+    def test_blocks(self):
+        markdown = """# This is a heading
+
+        This is a paragraph of text. It has some **bold** and *italic* words inside of it.
+
+        * This is the first list item in a list block
+        * This is a list item
+        * This is another list item"""
+
+        converted_markdown = markdown_to_blocks(markdown)
+
+        self.assertEqual(converted_markdown, [
+            '# This is a heading',
+            'This is a paragraph of text. It has some **bold** and *italic* words inside of it.',
+            '* This is the first list item in a list block\n* This is a list item\n* This is another list item'
+            ])
 
 if __name__ == "__main__":
     unittest.main()

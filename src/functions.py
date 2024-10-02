@@ -78,3 +78,69 @@ def split_nodes_link(old_nodes):
             if remaining_text:
                 new_nodes.append(TextNode(remaining_text, text_type_text))
     return new_nodes
+
+def text_to_textnodes(text):
+
+    nodes = [TextNode(text, text_type_text)]
+    nodes = split_nodes_delimiter(nodes, "**", text_type_bold)
+    nodes = split_nodes_delimiter(nodes, "*", text_type_italic)
+    nodes = split_nodes_delimiter(nodes, "`", text_type_code)
+
+    nodes = split_nodes_image(nodes)
+    nodes = split_nodes_link(nodes)
+
+    return nodes
+
+def markdown_to_blocks(markdown):
+    blocks_list = []
+    current_block = ""
+    for line in markdown.split("\n"):
+        if line != "":
+            if current_block == "":
+                current_block += line.strip()
+            else: 
+                current_block += "\n" + line.strip()
+        if line == "" and current_block != "":
+             blocks_list.append(current_block)
+             current_block = ""
+    if current_block != "":
+        blocks_list.append(current_block)
+    return blocks_list
+
+def block_to_blocktype(markdown_block):
+
+    if markdown_block.startswith(("#", "##", "###", "####", "#####", "######")):
+        return "heading"
+    if markdown_block.startswith("```") and markdown_block.endswith("```"):
+        return "code"
+    
+    lines = markdown_block.split("\n")
+    print("Lines:", lines)
+
+    if all(line.strip().startswith('>') for line in lines if line.strip()):
+        return "quote"
+    if all(line.strip().startswith('* ') or line.startswith('- ') for line in lines if line.strip()):
+        return "unordered_list"
+    if is_ordered_list(lines):
+        return "ordered_list"
+    return "paragraph"
+    
+def is_ordered_list(lines):
+    if not lines:
+        return False
+    for i,line in enumerate(lines, start=1):
+        if not line.strip().startswith(f"{i}. "):
+            return False
+    return True
+
+markdown = " this - is a heading."
+
+markdown2 = """
+1. this is a quote
+2. also a quote
+3. another quote
+"""
+
+blocktype = block_to_blocktype(markdown2)
+
+print(blocktype)
